@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 
+const userRoutes = require("./src/routes/user.routes");
+
 const app = express();
 
 app.use(
@@ -13,7 +15,6 @@ app.use(
 
 app.use(express.json());
 
-
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
@@ -24,44 +25,10 @@ app.get("/", (req, res) => {
 app.get("/hello", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Hello Saif, Express is working with AWS Lambda setup!",
+    message: "Hello Saif, Express is working with AWS Lambda and DynamoDB setup!",
   });
 });
 
-app.get("/users", (req, res) => {
-  const users = [
-    {
-      id: 1,
-      name: "Saif",
-      role: "Senior Software Engineer",
-    },
-    {
-      id: 2,
-      name: "Zainab",
-      role: "Biochemistry",
-    },
-  ];
-
-  res.status(200).json({
-    success: true,
-    data: users,
-  });
-});
-
-app.post("/users", (req, res) => {
-  const { name, role } = req.body;
-
-  const newUser = {
-    id: Date.now(),
-    name,
-    role,
-  };
-
-  res.status(201).json({
-    success: true,
-    message: "User created successfully",
-    data: newUser,
-  });
-});
+app.use("/users", userRoutes);
 
 module.exports = app;
