@@ -1,4 +1,13 @@
 const serverless = require("serverless-http");
-const app = require("./app");
+const createApp = require("./app");
 
-module.exports.handler = serverless(app);
+let cachedHandler;
+
+module.exports.handler = async (event, context) => {
+  if (!cachedHandler) {
+    const app = await createApp();
+    cachedHandler = serverless(app);
+  }
+
+  return cachedHandler(event, context);
+};
