@@ -1,18 +1,24 @@
 service: mern-project-interview-backend
 
+useDotenv: true
+
 provider:
   name: aws
   runtime: nodejs20.x
   region: ap-south-1
+  stage: ${opt:stage, 'dev'}
   memorySize: 128
   timeout: 10
-  logRetentionInDays: 1
+  logRetentionInDays: 7
 
   httpApi:
     cors: true
 
   environment:
+    STAGE: ${sls:stage}
     USERS_TABLE: ${self:service}-users-${sls:stage}
+    CACHE_TTL_SECONDS: ${env:CACHE_TTL_SECONDS, '60'}
+    REDIS_URL: ${env:REDIS_URL, ''}
 
   iam:
     role:
