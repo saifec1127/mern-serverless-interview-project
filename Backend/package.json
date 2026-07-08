@@ -7,8 +7,12 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "invoke": "serverless invoke local --function app",
-    "deploy": "serverless deploy",
-    "remove": "serverless remove"
+    "deploy:dev": "serverless deploy --stage dev",
+    "deploy:test": "serverless deploy --stage test",
+    "deploy:prod": "serverless deploy --stage prod",
+    "remove:dev": "serverless remove --stage dev",
+    "remove:test": "serverless remove --stage test",
+    "remove:prod": "serverless remove --stage prod"
   },
   "dependencies": {
     "@apollo/server": "^5.5.1",

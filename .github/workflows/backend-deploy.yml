@@ -1,0 +1,58 @@
+name: Backend CI/CD Deploy
+
+on:
+  push:
+    branches:
+      - develop
+      - test
+      - main
+    paths:
+      - "Backend/**"
+      - ".github/workflows/backend-deploy.yml"
+
+jobs:
+  backend-deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: Backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+
+      - name: Decide deployment stage
+        id: stage
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "develop" ]; then
+            echo "stage=dev" >> $GITHUB_OUTPUT
+          elif [ "${GITHUB_REF_NAME}" = "test" ]; then
+            echo "stage=test" >> $GITHUB_OUTPUT
+          elif [ "${GITHUB_REF_NAME}" = "main" ]; then
+            echo "stage=prod" >> $GITHUB_OUTPUT
+          else
+            echo "stage=dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Print deployment stage
+        run: echo "Deploying to ${{ steps.stage.outputs.stage }} environment"
+
+      - name: Deploy backend with Serverless Framework
+        run: npx serverless deploy --stage ${{ steps.stage.outputs.stage }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ap-south-1
+          CACHE_TTL_SECONDS: ${{ vars.CACHE_TTL_SECONDS }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
